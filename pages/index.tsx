@@ -1,14 +1,14 @@
 import Image from "next/image";
-import { Inter } from "next/font/google";
+import { Pixelify_Sans } from "next/font/google";
 
-const inter = Inter({ subsets: ["latin"] });
+const pixelSans = Pixelify_Sans({ subsets: ['latin'] });
 
 export default function Home() {
   return (
     <main
-      className={`flex min-h-screen flex-col items-center justify-between p-24 ${inter.className}`}
+      className={`flex min-h-screen flex-col items-center justify-between p-24 ${pixelSans.className}`}
     >
-      Circle Employee Anniversary NFTs
+      <h1 className="text-5xl">Circle Employee Anniversary NFTs</h1>
     </main>
   );
 }
