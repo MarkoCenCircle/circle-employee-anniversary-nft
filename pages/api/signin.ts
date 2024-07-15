@@ -1,11 +1,10 @@
 import type { NextApiHandler } from "next";
 
-
 const signinHandler: NextApiHandler<void> = (
   req,
   res,
 ) => {
-    if (req.method === 'POST') {
+   if (req.method === 'POST') {
         // sign in logic goes here...
         res.json()
     } else {
