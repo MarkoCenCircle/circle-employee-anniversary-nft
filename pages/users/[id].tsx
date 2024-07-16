@@ -3,9 +3,11 @@ import { FontAwesomeIcon as Icon } from '@fortawesome/react-fontawesome'
 import { faFacebook, faTwitter, faLinkedinIn } from '@fortawesome/free-brands-svg-icons'
 import Link from "next/link";
 import {NextSeo, NextSeoProps} from "next-seo";
+import {useRouter} from "next/router";
 
 const User = () => {
-  const url = typeof window === 'undefined' ? '' : window.location.href
+  const router = useRouter()
+  const url = `https://circle-employee-anniversary-nft.vercel.app${router.asPath}`
   const twitterUrl = `https://twitter.com/intent/tweet?url=${encodeURI(url)}`
   const facebookUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURI(url)}`
   const linkedInUrl = `http://www.linkedin.com/shareArticle?mini=true&url=${encodeURI(url)}`
