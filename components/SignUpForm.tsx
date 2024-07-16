@@ -66,7 +66,7 @@ export const SignUpForm = () => {
 
         <div>
           <div className="flex items-center justify-between">
-            <label htmlFor="password" className="block text-md font-medium leading-6 text-white">
+            <label htmlFor="start-date" className="block text-md font-medium leading-6 text-white">
               Start Date
             </label>
           </div>
