@@ -1,6 +1,7 @@
 import "@/styles/globals.css";
 import type { AppProps } from "next/app";
 import {DefaultSeo, DefaultSeoProps } from "next-seo";
+import {Pixelify_Sans} from "next/font/google";
 
 const seoOptions: DefaultSeoProps = {
   defaultTitle: 'Circle Anniversary NFTs',
@@ -17,13 +18,13 @@ const seoOptions: DefaultSeoProps = {
     locale: 'en_US',
     images: [{
       url: 'https://circle-employee-anniversary-nft.vercel.app/nft-pics/1.png',
-      width: 1000,
-      height: 1000,
+      width: 500,
+      height: 500,
       alt: 'Sign up to receive NFTs on your Circle anniversaries!',
       type: 'image/png'
     }],
-    defaultImageHeight: 1000,
-    defaultImageWidth: 1000,
+    defaultImageHeight: 500,
+    defaultImageWidth: 500,
   },
   twitter: {
     site: 'https://circle-employee-anniversary-nft.vercel.app/',
@@ -31,9 +32,13 @@ const seoOptions: DefaultSeoProps = {
   }
 }
 
+const pixelSans = Pixelify_Sans({ subsets: ['latin'] });
+
 export default function App({ Component, pageProps }: AppProps) {
   return <>
     <DefaultSeo {...seoOptions} />
-    <Component {...pageProps} />
+    <main className={pixelSans.className}>
+      <Component {...pageProps} />
+    </main>
   </>;
 }
