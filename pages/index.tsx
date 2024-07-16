@@ -1,9 +1,6 @@
-import { Pixelify_Sans } from "next/font/google";
 import {SignUpForm} from "@/components/SignUpForm";
 import {useState} from "react";
 import {SignInForm} from "@/components/SignInForm";
-
-const pixelSans = Pixelify_Sans({ subsets: ['latin'] });
 
 export default function Home() {
   const [isSignIn, setIsSignIn] = useState(false)
@@ -13,12 +10,12 @@ export default function Home() {
   }
 
   return (
-    <div  className={`flex min-h-screen flex-col items-center py-24 px-12 ${pixelSans.className}`}>
-      <header className='flex items-center flex-col gap-2'>
+    <div className={`flex min-h-screen flex-col items-center py-24 px-12`}>
+      <div className='flex items-center flex-col gap-2'>
         <h1 className="text-5xl">Circle Anniversary NFTs</h1>
         <h2 className="text-2xl">Sign up to receive NFTs on your Circle anniversaries!</h2>
-      </header>
-      <main className='flex items-center flex-col gap-2 w-full'>
+      </div>
+      <div className='flex items-center flex-col gap-2 w-full'>
         {!isSignIn && <SignUpForm/>}
         {isSignIn && <SignInForm/>}
         <p className="mt-5 text-center text-md text-gray-400">
@@ -27,7 +24,7 @@ export default function Home() {
             {!isSignIn ? 'View your NFTs here' : 'Sign up here'}
           </button>
         </p>
-      </main>
+      </div>
     </div>
   );
 }
