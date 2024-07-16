@@ -1,4 +1,4 @@
-import { object, string, date } from 'yup'
+import { object, string } from 'yup'
 import type { InferType } from 'yup'
 import {useForm} from "react-hook-form";
 import {yupResolver} from "@hookform/resolvers/yup";
