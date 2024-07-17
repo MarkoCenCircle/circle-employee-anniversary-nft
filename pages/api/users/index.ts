@@ -7,17 +7,17 @@ const nftsHandler: NextApiHandler = async (
 ) => {
     if (req.method === 'GET') {
         // Parse and validate query parameters
-        const { email } = req.query;
+        let email: string = (req.query.email as string ?? '').trim()
+
         if (!email) {
             res.json([])
             return
         }
-        if (typeof email !== "string") {
-            res.status(400).end('Invalid email query parameter')
-            return
-        }
 
-        // Search DB for users
+      // remove the alias part
+      email = email.replace(/\+.*@/, '@')
+
+      // Search DB for users
         let users = await prisma.user.findMany({
             where: {
                 email: {
@@ -33,11 +33,6 @@ const nftsHandler: NextApiHandler = async (
             const user = users[i];
             foundUsers.push({
                 userId: user.id,
-                email: user.email,
-                firstName: user.firstName,
-                lastName: user.lastName,
-                joinDate: user.employmentStartDate,
-                position: user.position
             })
         }
         res.json(foundUsers)

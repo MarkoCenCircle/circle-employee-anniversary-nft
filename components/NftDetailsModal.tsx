@@ -1,23 +1,21 @@
 import { Dialog, DialogBackdrop, DialogPanel, DialogTitle } from '@headlessui/react'
 import {Pixelify_Sans} from "next/font/google";
 import Image from "next/image";
-import {formatOrdinals} from "@/components/ordinals";
+import {NftResponse} from "@/models/userProfile";
+import Link from "next/link";
 
 interface Props {
   open: boolean
   onClose: () => void
-  tokenId?: number;
+  token?: NftResponse;
 }
 
 const pixelSans = Pixelify_Sans({ subsets: ['latin'] });
 
-export const NftDetailsModal: React.FC<Props> = ({ open, onClose, tokenId }) => {
-  if (tokenId === undefined) {
+export const NftDetailsModal: React.FC<Props> = ({ open, onClose, token }) => {
+  if (token === undefined) {
     return null
   }
-
-  const ordinals = formatOrdinals(tokenId)
-  const title = tokenId === 0 ? `Welcome to Circle!` : `Happy ${ordinals} Circleversary!`
 
   return (
     <Dialog open={open} onClose={onClose} className={`relative z-10 ${pixelSans.className}`}>
@@ -36,16 +34,17 @@ export const NftDetailsModal: React.FC<Props> = ({ open, onClose, tokenId }) => 
               <div>
                 <Image
                   className='mx-auto'
-                  src={`/nft-pics/${tokenId}.png`} width={300} height={300} alt={title}/>
+                  src={`/nft-pics/${token.tokenId}.png`} width={300} height={300} alt={token.title ?? ''}/>
               </div>
-              <div className="mt-2 flex flex-col gap-4">
-                <DialogTitle as="h3" className="text-2xl leading-6">{title}</DialogTitle>
-                <div>
-                  <p className="text-gray-400 break-words">
-                    Address: 0x95222290DD7278Aa3Ddd389Cc1E1d165CC4BAfe5
+              <div className="mt-2 flex flex-col gap-6">
+                <DialogTitle as="h3" className="text-2xl leading-6">{token.title}</DialogTitle>
+                <div className='flex flex-col gap-4'>
+                  <p className="text-gray-400 text-xl">
+                    {token.description}
                   </p>
-                  <p className="text-gray-400">
-                    Received on: 07/15/2022
+                  <p className="text-gray-400 break-words">
+                    Address: <Link className='underline' href={`https://polygonscan.com/address/${token.address}`} target='_blank'
+                                   rel="noopener noreferrer">{token.address}</Link>
                   </p>
                 </div>
               </div>

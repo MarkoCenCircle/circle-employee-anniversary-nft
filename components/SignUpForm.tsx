@@ -2,6 +2,9 @@ import { object, string } from 'yup'
 import type { InferType } from 'yup'
 import {useForm} from "react-hook-form";
 import {yupResolver} from "@hookform/resolvers/yup";
+import {SignUpRequest, SignUpResponse} from "@/models/signUp";
+import {useRouter} from "next/router";
+import {useState} from "react";
 
 const signUpSchema = object().shape({
   email: string()
@@ -20,7 +23,6 @@ const signUpSchema = object().shape({
       'is-start-date',
       'Please enter a valid start date',
       startDate => {
-        console.log(startDate)
         try {
           const timestamp = Date.parse(startDate)
           return !isNaN(timestamp)
@@ -34,16 +36,50 @@ const signUpSchema = object().shape({
 type SignUpFormValues = InferType<typeof signUpSchema>
 
 export const SignUpForm = () => {
+  const router = useRouter()
+  const [loading, setLoading] = useState(false)
+
   const { register, handleSubmit, formState} = useForm<SignUpFormValues>({
     defaultValues: {
       email: '',
-      startDate: new Date().toISOString()
+      startDate: ''
     },
     resolver: yupResolver(signUpSchema),
   })
 
-  const onSubmit = () => {
+  const onSubmit = async (values: SignUpFormValues) => {
+    const joinDate = new Date(values.startDate)
+    joinDate.setHours(0)
+    joinDate.setSeconds(0)
+    joinDate.setMilliseconds(0)
 
+    try {
+      if (loading) {
+        return
+      }
+
+      setLoading(true)
+      const headers = new Headers();
+      headers.append("Content-Type", "application/json");
+
+      const res = await fetch('/api/signup',{
+        method: 'POST',
+        body: JSON.stringify({
+          email: values.email,
+          joinDate: joinDate.getTime()
+        } as SignUpRequest),
+        headers
+      })
+
+      const data = await res.json() as SignUpResponse
+
+      void router.replace(`/users/${data.userId}`)
+    } catch(ex) {
+      console.error(ex)
+    }
+    finally {
+      setLoading(false)
+    }
   }
 
   return <div className="flex min-h-full flex-1 flex-col justify-center w-full">
@@ -84,9 +120,10 @@ export const SignUpForm = () => {
         <div>
           <button
             type="submit"
-            className="flex w-full justify-center rounded-md bg-indigo-500 px-3 py-1.5 text-md font-semibold leading-6 text-white shadow-sm hover:bg-indigo-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500"
+            disabled={loading}
+            className="disabled:opacity-70 flex w-full justify-center rounded-md bg-indigo-500 px-3 py-1.5 text-md font-semibold leading-6 text-white shadow-sm hover:bg-indigo-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500"
           >
-            Sign up
+            {loading ? 'Loading...' : 'Sign up'}
           </button>
         </div>
       </form>

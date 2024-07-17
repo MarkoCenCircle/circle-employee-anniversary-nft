@@ -1,6 +1,8 @@
 import {type InferType, object, string} from "yup";
 import {useForm} from "react-hook-form";
 import {yupResolver} from "@hookform/resolvers/yup";
+import {useRouter} from "next/router";
+import {useState} from "react";
 
 const signInSchema = object().shape({
   email: string()
@@ -17,6 +19,9 @@ const signInSchema = object().shape({
 type SignInFormValues = InferType<typeof signInSchema>
 
 export const SignInForm = () => {
+  const router = useRouter()
+  const [error, setError] = useState('')
+  const [loading, setLoading] = useState(false)
   const {register, handleSubmit, formState} = useForm<SignInFormValues>({
     defaultValues: {
       email: '',
@@ -24,8 +29,34 @@ export const SignInForm = () => {
     resolver: yupResolver(signInSchema),
   })
 
-  const onSubmit = () => {
+  const onSubmit = async (values: SignInFormValues) => {
+    try {
+      if (loading) {
+        return
+      }
 
+      setError('')
+      setLoading(true)
+      const headers = new Headers();
+      headers.append("Content-Type", "application/json");
+
+      const res = await fetch(`/api/users?email=${values.email}`, {
+        method: 'GET',
+        headers,
+      })
+
+      const data = await res.json() as { userId: number }[]
+
+      if (!data || data.length <= 0) {
+        setError('No profile found.')
+      }
+
+      void router.push(`/users/${data[0].userId}`)
+    } catch(ex) {
+      console.error(ex)
+    } finally {
+      setLoading(false)
+    }
   }
 
   return <div className="flex min-h-full flex-1 flex-col justify-center w-full">
@@ -47,11 +78,16 @@ export const SignInForm = () => {
         </div>
 
         <div>
+          {error}
+        </div>
+
+        <div>
           <button
             type="submit"
-            className="flex w-full justify-center rounded-md bg-indigo-500 px-3 py-1.5 text-md font-semibold leading-6 text-white shadow-sm hover:bg-indigo-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500"
+            disabled={loading}
+            className="disabled:opacity-70 flex w-full justify-center rounded-md bg-indigo-500 px-3 py-1.5 text-md font-semibold leading-6 text-white shadow-sm hover:bg-indigo-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500"
           >
-            View my NFTs
+            {loading ? 'Loading...' : 'View my NFTs'}
           </button>
         </div>
       </form>
