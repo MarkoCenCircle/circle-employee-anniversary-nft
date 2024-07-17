@@ -6,8 +6,18 @@ import {NextSeo, NextSeoProps} from "next-seo";
 import {useRouter} from "next/router";
 import {NftDetailsModal} from "@/components/NftDetailsModal";
 import {useCallback, useState} from "react";
+import {GetServerSideProps} from "next";
+import {getUserProfile} from "@/handlers/getUserProfile";
+import {NftResponse} from "@/models/userProfile";
+import capitalize from 'lodash.capitalize'
 
-const User = () => {
+interface Props {
+  firstName: string;
+  joinDate: number;
+  nfts: NftResponse[]
+}
+
+const User: React.FC<Props> = ({ firstName, joinDate, nfts }) => {
   const router = useRouter()
   const url = `https://circle-employee-anniversary-nft.vercel.app${router.asPath}`
   const twitterUrl = `https://twitter.com/intent/tweet?url=${encodeURI(url)}`
@@ -15,16 +25,27 @@ const User = () => {
   const linkedInUrl = `http://www.linkedin.com/shareArticle?mini=true&url=${encodeURI(url)}`
 
   const [modalOpen, setModalOpen] = useState(false)
-  const [tokenId, setTokenId] = useState<number | undefined>()
+  const [token, setToken] = useState<NftResponse>()
 
   const onModalClose = useCallback(() => {
     setModalOpen(false)
   }, [])
 
-  const onImageClick = useCallback((value: number) => {
-    setTokenId(value)
+  const onImageClick = useCallback((nft: NftResponse) => {
+    setToken(nft)
     setModalOpen(true)
   }, [])
+
+  const description = `Happy Circleversaries, ${firstName}!`
+
+  const restBlocks = Array(12 - nfts.length).fill(1)
+
+  const nextTime = new Date(joinDate ? joinDate * 1000 : Date.now())
+  nextTime.setFullYear(nextTime.getFullYear() + 1)
+
+  const sortedNfts = nfts ? [...nfts.sort((a,b) => a.tokenId > a.tokenId ? 1 : -1)] : []
+
+  const imageUrl = `https://circle-employee-anniversary-nft.vercel.app/nft-pics/${sortedNfts[sortedNfts.length - 1].tokenId ?? 1}.png`
 
   const seoProps: NextSeoProps = {
     title: 'Check my Circle anniversary NFTs!',
@@ -32,16 +53,16 @@ const User = () => {
     nofollow: true,
     noindex: true,
     canonical: url,
-    description: 'Happy Circleversaries, Marko!',
+    description,
     openGraph: {
       title: 'Check my Circle anniversary NFTs!',
       url,
       type: 'website',
-      description: 'Happy Circleversaries, Marko!',
+      description,
       siteName: 'Circle Anniversary NFTs',
       locale: 'en_US',
       images: [{
-        url: 'https://circle-employee-anniversary-nft.vercel.app/nft-pics/1.png',
+        url: imageUrl,
         width: 500,
         height: 500,
         alt: 'Sign up to receive NFTs on your Circle anniversaries!',
@@ -60,8 +81,8 @@ const User = () => {
     <NextSeo {...seoProps} />
     <div className={`flex min-h-screen flex-col items-center py-24 px-6`}>
       <div className='flex flex-col gap-2'>
-        <h1 className="text-4xl">Happy Circleversaries, Marko!</h1>
-        <h2 className="text-2xl">Click to see the NFT details, you will receive your next NFT on 07/16/2025</h2>
+        <h1 className="text-4xl">{`Happy Circleversaries, ${firstName}!`}</h1>
+        <h2 className="text-2xl">Click to see the NFT details, you will receive your next NFT on {nextTime.toDateString()}</h2>
         <div className="text-xl flex items-center gap-3">
           <label>Share on</label>
           <Link href={linkedInUrl} target='_blank' rel="noopener noreferrer">
@@ -78,23 +99,46 @@ const User = () => {
       <div className='container mx-auto lg:px-36'>
         <div className='mt-12 grid grid-flow-row grid-cols-2 md:grid-cols-3 lg:grid-cols-4 w-full'>
           {
-            ([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]).map((value) => {
-              return <div className='mb-10 w-36 h-36 md:w-52 md:h-52 xl:w-60 xl:h-60 relative mx-auto' key={value}>
-                {value <=6 ?
-                  <Image
-                    onClick={() => onImageClick(value)}
-                    className='hover:scale-105 transition-transform cursor-pointer'
-                    src={`/nft-pics/${value}.png`} fill alt={`Happy ${value} Circleversary!`}
-                  />
-                  : <div className='w-full h-full border rounded-2xl border-amber-100 border-dashed'></div>}
+            (sortedNfts).map((nft) => {
+              return <div className='mb-10 w-36 h-36 md:w-52 md:h-52 xl:w-60 xl:h-60 relative mx-auto'
+                          key={nft.tokenId}>
+                <Image
+                  onClick={() => onImageClick(nft)}
+                  className='hover:scale-105 transition-transform cursor-pointer'
+                  src={`/nft-pics/${nft.tokenId}.png`} fill alt={nft.description ?? ''}
+                />
               </div>
             })
+          }
+          {
+            restBlocks.map((num) => (
+              <div className='mb-10 w-36 h-36 md:w-52 md:h-52 xl:w-60 xl:h-60 relative mx-auto'
+                   key={num}>
+                <div className='w-full h-full border rounded-2xl border-amber-100 border-dashed'></div>
+              </div>
+              )
+            )
           }
         </div>
       </div>
     </div>
-    <NftDetailsModal open={modalOpen} onClose={onModalClose} tokenId={tokenId} />
+    <NftDetailsModal open={modalOpen} onClose={onModalClose} token={token} />
   </>
+}
+
+export const getServerSideProps: GetServerSideProps = async ({ query }) => {
+  const { id } = query as { id: string }
+  const profile = await getUserProfile({
+    userId: Number(id)
+  })
+
+  return {
+    props: {
+      firstName: capitalize(profile.firstName),
+      joinDate: profile.joinDate,
+      nfts: profile.nfts
+    }
+  }
 }
 
 export default User

@@ -1,21 +1,7 @@
 import type { NextApiHandler } from "next";
 import { getSmartContractPlatformClient, CIRCLE_NFT_CONTRACT_ID } from '../../circle'
 import prisma from '../../../../prisma'
-
-export type NftResponse = {
-    address: string
-    tokenId: number
-    imageUrl: string
-    title: string | null
-    description: string | null
-    ownerCompanyInfo?: NftCompanyOwnerResponse
-};
-
-type NftCompanyOwnerResponse = {
-    companyName: string
-    companyDomain: string
-    companyFoundingDate: number
-}
+import {NftResponse} from "@/models/userProfile";
 
 async function getNftOwnerCompanySummary() {
     const circleScpClient = getSmartContractPlatformClient();
