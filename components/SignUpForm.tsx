@@ -73,7 +73,10 @@ export const SignUpForm = () => {
 
       const data = await res.json() as SignUpResponse
 
-      void router.replace(`/users/${data.userId}`)
+      void router.push({
+        pathname: `/users/[id]`,
+        query: { id: data. userId }
+      })
     } catch(ex) {
       console.error(ex)
     }

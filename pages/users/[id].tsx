@@ -43,9 +43,9 @@ const User: React.FC<Props> = ({ firstName, joinDate, nfts }) => {
   const nextTime = new Date(joinDate ? joinDate * 1000 : Date.now())
   nextTime.setFullYear(nextTime.getFullYear() + 1)
 
-  const sortedNfts = nfts ? [...nfts.sort((a,b) => a.tokenId > a.tokenId ? 1 : -1)] : []
+  const sortedNfts = nfts ? [...nfts.sort((a,b) => a.tokenId > b.tokenId ? 1 : -1)] : []
 
-  const imageUrl = `https://circle-employee-anniversary-nft.vercel.app/nft-pics/${sortedNfts[sortedNfts.length - 1].tokenId ?? 1}.png`
+  const imageUrl = `https://circle-employee-anniversary-nft.vercel.app/nft-pics/${sortedNfts[sortedNfts.length - 1]?.tokenId ?? 1}.png`
 
   const seoProps: NextSeoProps = {
     title: 'Check my Circle anniversary NFTs!',
@@ -76,7 +76,7 @@ const User: React.FC<Props> = ({ firstName, joinDate, nfts }) => {
       cardType: 'summary_large_image'
     }
   }
-
+console.log(sortedNfts)
   return <>
     <NextSeo {...seoProps} />
     <div className={`flex min-h-screen flex-col items-center py-24 px-6`}>
@@ -101,7 +101,7 @@ const User: React.FC<Props> = ({ firstName, joinDate, nfts }) => {
           {
             (sortedNfts).map((nft) => {
               return <div className='mb-10 w-36 h-36 md:w-52 md:h-52 xl:w-60 xl:h-60 relative mx-auto'
-                          key={nft.tokenId}>
+                          key={nft.title}>
                 <Image
                   onClick={() => onImageClick(nft)}
                   className='hover:scale-105 transition-transform cursor-pointer'
