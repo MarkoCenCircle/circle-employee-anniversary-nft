@@ -24,7 +24,11 @@ const nftsHandler: NextApiHandler = async (
 
         try {
           const response = await getUserProfile({ userId })
-          res.json(response)
+          if (response.data) {
+            res.json(response.data)
+          } else {
+            res.status(response.httpStatus).end(response.errMsg);
+          }
         } catch (ex) {
           res.status(500).json(ex)
         }

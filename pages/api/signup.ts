@@ -1,57 +1,37 @@
 import type { NextApiHandler, NextApiRequest, NextApiResponse } from "next"
-import { User } from '@prisma/client'
 import {
     getDevWalletsClient,
-    CREATE_SIGNUP_IDP_KEY_UUID_NAMESPACE,
+    getNftOwnerCompanyFoundingDate,
+    CREATE_USER_PROFILE_IDP_KEY_UUID_NAMESPACE,
     CIRCLE_EMPLOYEE_NFTS_WALLET_SET_ID,
-    CIRCLE_NFT_MINTER_WALLET_ID,
-    CIRCLE_NFT_CONTRACT_ADDRESS
-} from './circle';
+} from './common/circle';
 import { v5 as uuidv5 } from 'uuid';
-import { Wallet } from "@circle-fin/developer-controlled-wallets/dist/types/clients/developer-controlled-wallets";
 import prisma from '../../prisma'
-import { getYearsElapsed, dateToUnixSeconds } from './utils/time'
-import {SignUpRequest, SignUpResponse} from "@/models/signUp";
+import { capitalizeFirstLetter } from './common'
+import { getEmailTransporter, validateEmail, normalizeEmail } from './common/email'
+import { dateToUnixSeconds, unixSecondsToDate } from './common/time'
+import { generateUserJwt } from './common/auth'
+import { SignUpRequest, SignUpResponse } from "@/models/signUp";
 
-// Attempts to batch create Circleversary NFTs. Returns whether or not the initial request succeeded.
-//  Note: it is still possible for the request to fail async on-chain.
-async function mintWorkAnniversaryNfts(user: User, userWallet: Wallet): Promise<boolean> {
-    const circlePwClient = getDevWalletsClient();
-    const numYearsEmployed = getYearsElapsed(user.employmentStartDate)
 
-    const tokenIds: number[] = [];
-    const nftTokenAmounts: number[] = [];
+async function sendNewAccountVerifcationEmail(recipientFirstName: string, recipientEmail: string, jwtToken: string, hasActivatedProfile: boolean) {
+    recipientFirstName = capitalizeFirstLetter(recipientFirstName);
 
-    for (let i = 0; i <= numYearsEmployed; i++) {
-        // Token ID i corresponds to the employee's <i>-versary
-        tokenIds.push(i);
-        nftTokenAmounts.push(1);
+    const appVerifyEmailUrl = `https://circle-employee-anniversary-nft.vercel.app/redeemNfts?tok=${jwtToken}`
+    const emailContent = {
+        subject: 'Create Your Profile and Recieve Your Circle NFTs 🏆',
+        body: [
+            `Hello ${recipientFirstName},`,
+            `Welcome to the Circle Achievement NFTs app 😎! Create your profile and redeem your NFTs by clicking on <a href="${appVerifyEmailUrl}">this link</a>. If you did not request a new profile, please ignore this email. No follow-up action is needed.`
+        ]
     }
 
-    const res = await circlePwClient.createContractExecutionTransaction({
-        idempotencyKey: uuidv5(numYearsEmployed + user.email, CREATE_SIGNUP_IDP_KEY_UUID_NAMESPACE),
-        walletId: CIRCLE_NFT_MINTER_WALLET_ID,
-        fee: {
-            type: 'level',
-            config: {
-                feeLevel: 'MEDIUM',
-            },
-        },
-        contractAddress: CIRCLE_NFT_CONTRACT_ADDRESS,
-        abiFunctionSignature: "mintBatch(address,uint256[],uint256[],bytes)",
-        abiParameters: [
-            userWallet.address,
-            tokenIds,
-            nftTokenAmounts,
-            "0x01"
-        ],
+    const resp = await getEmailTransporter().sendMail({
+        to: recipientEmail,
+        subject: emailContent.subject,
+        html: '<p>' + emailContent.body.join('<br><br>') + '</p>'
     });
-
-    const didFail = !res.data || res.data.state === 'FAILED'
-    if (!didFail) {
-        console.log(`Creating NFT(s) for user ${user.id}'s ${numYearsEmployed}-year work anniversary. PW tx details: `, res.data)
-    }
-    return !didFail;
+    console.log("Successfully sent new account signup email", resp);
 }
 
 
@@ -60,32 +40,26 @@ const signupHandler: NextApiHandler<void> = async (
     res: NextApiResponse,
 ) => {
     if (req.method === 'POST') {
-        // Request body validation. For testing purposes, skipping the +alias de-duping validation for now.
+        // Request body validation
         const payload = req.body as SignUpRequest
-
-        if (!payload.email || !payload.email.endsWith("@circle.com")) {
-            res.status(400).json('Invalid email')
+        const companyFoundingDate = await getNftOwnerCompanyFoundingDate();
+        if (payload.joinDate < companyFoundingDate) {
+            res.status(400).json('Invalid start date. Please make sure your time stamp is in Unix seconds.')
             return
         }
 
-        // remove the alias part
-        const email: string = payload.email.trim().replace(/\+.*@/, '@')
-        // parse first name and last name from email id
-        const [firstName, lastName] = email.split('@')[0].split('.')
-
-        // Query DB to see if user has already signed up
-        let user = await prisma.user.findFirst({
-            where: { email }
-        })
-
-        if (user) {
-            console.log(`User ${user.id} has already signed up. Updating details and searching for new unlocked NFTs.`)
+        // Validate and parse email
+        if (!payload.email || !validateEmail(payload.email)) {
+            res.status(400).json('Invalid email')
+            return
         }
+        const email: string = normalizeEmail(payload.email)
+        const [firstName, lastName] = email.split('@')[0].split('.')
 
         // Create wallet to hold user's NFTs
         const circlePwClient = getDevWalletsClient();
         const userWallets = await circlePwClient.createWallets({
-            idempotencyKey: uuidv5(email, CREATE_SIGNUP_IDP_KEY_UUID_NAMESPACE),
+            idempotencyKey: uuidv5(email, CREATE_USER_PROFILE_IDP_KEY_UUID_NAMESPACE),
             blockchains: ["MATIC"],
             accountType: "EOA",
             count: 1,
@@ -97,31 +71,38 @@ const signupHandler: NextApiHandler<void> = async (
         }
         const userWallet = userWallets.data.wallets[0];
 
-        // Upsert DB record of user
-        const employmentStartDate = new Date(payload.joinDate);
+        // Check for existing DB record to determine whether user has an existing profile
+        let user = await prisma.user.findUnique({
+            where: { email }
+        })
+        if (!user) {  console.log(`Creating DB user entry for new user with email ${payload.email}`) }
 
+        const hasActivatedProfile = user?.isVerified ?? false;
+
+        // Upsert user in DB
         user = await prisma.user.upsert({
-            where: {
-                email,
-            },
-            update: {
-                position: payload.position,
-                employmentStartDate: employmentStartDate,
-                circleWalletId: userWallet.id,
-            },
+            update: { position: payload.position },
+            where: { email },
+
             create: {
                 email,
                 firstName: firstName ?? '',
                 lastName: lastName ?? '',
                 position: payload.position ?? '',
-                employmentStartDate: employmentStartDate,
-                circleWalletId: userWallet.id
+                employmentStartDate: unixSecondsToDate(payload.joinDate),
+                circleWalletId: userWallet.id,
+                isVerified: false
             },
         })
 
-        // Mint work anniversary NFTs for user based on their employmentStartDate
-        if (!await mintWorkAnniversaryNfts(user, userWallet)) {
-            res.status(500).end('Unable to create user work anniversary NFTs')
+        // Send new account email
+        const userJwt = generateUserJwt(user.id)
+        try {
+            if (!user.isVerified) {
+                await sendNewAccountVerifcationEmail(user.firstName, user.email, userJwt, hasActivatedProfile);
+            }
+        } catch (err) {
+            res.status(500).end('Something went wrong while trying to send email')
             return
         }
 
@@ -130,7 +111,8 @@ const signupHandler: NextApiHandler<void> = async (
             userId: user.id,
             email: user.email,
             walletAddress: userWallet.address,
-            joinDate: dateToUnixSeconds(employmentStartDate)
+            joinDate: dateToUnixSeconds(user.employmentStartDate),
+            isEmailAlreadyVerified: user.isVerified
         } as SignUpResponse)
     } else {
         res.status(405).end('Method Not Allowed')

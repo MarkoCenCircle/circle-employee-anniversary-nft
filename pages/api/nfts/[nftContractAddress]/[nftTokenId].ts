@@ -1,30 +1,8 @@
 import type { NextApiHandler } from "next";
-import { getSmartContractPlatformClient, CIRCLE_NFT_CONTRACT_ID } from '../../circle'
+import { getNftOwnerCompanySummary } from '../../common/circle'
 import prisma from '../../../../prisma'
 import {NftResponse} from "@/models/userProfile";
 
-async function getNftOwnerCompanySummary() {
-    const circleScpClient = getSmartContractPlatformClient();
-
-    // TODO: replace with single contract read call to get the company summary
-    const abiFunctionCalls = [
-        'companyName()',
-        'companyDomain()',
-        'companyFoundingDate()',
-    ];
-    const contractReadRes = await Promise.all(abiFunctionCalls.map(
-        async abiFuncSig => {
-            // TODO: replace with queryContract function once it becomes available on the SDK
-            const readContractResp = await circleScpClient.readContract({
-                id: CIRCLE_NFT_CONTRACT_ID,
-                abiFunctionSignature: abiFuncSig
-            })
-            return readContractResp.data?.outputValues?.[0]
-        }
-    ))
-
-    return contractReadRes
-}
 
 const nftsHandler: NextApiHandler = async (
     req,
@@ -43,10 +21,12 @@ const nftsHandler: NextApiHandler = async (
         }
 
         // Query DB for token metadata
-        const nft = await prisma.nft.findFirst({
+        const nft = await prisma.nft.findUnique({
             where: {
-                tokenAddress: nftContractAddress,
-                tokenId: parseInt(nftTokenId)
+                tokenAddress_tokenId: {
+                    tokenAddress: nftContractAddress,
+                    tokenId: parseInt(nftTokenId)
+                }
             }
         })
         if (!nft) {
@@ -55,7 +35,7 @@ const nftsHandler: NextApiHandler = async (
         }
 
         // Query NFT smart contract for company info
-        const [companyName, companyDomain, companyFoundingDate] = await getNftOwnerCompanySummary()
+        const companySummary = await getNftOwnerCompanySummary();
 
         // Build and send response
         const response: NftResponse = {
@@ -65,11 +45,8 @@ const nftsHandler: NextApiHandler = async (
             description: nft.description,
             imageUrl: nft.imageUrl,
 
-            ownerCompanyInfo: {
-                companyName: companyName,
-                companyDomain: companyDomain,
-                companyFoundingDate: parseInt(companyFoundingDate)
-            }
+            // @ts-ignore
+            ownerCompanyInfo: companySummary
         };
         res.json(response)
     } else {

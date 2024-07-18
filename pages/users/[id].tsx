@@ -168,11 +168,15 @@ const User: React.FC<Props> = ({ firstName, joinDate, walletAddress, nfts }) => 
   </>
 }
 
-export const getServerSideProps: GetServerSideProps = async ({query}) => {
-  const {id} = query as { id: string }
-  const profile = await getUserProfile({
+export const getServerSideProps: GetServerSideProps = async ({ query }) => {
+  const { id } = query as { id: string }
+  const httpWrappedProfile = await getUserProfile({
     userId: Number(id)
   })
+  if (!httpWrappedProfile.data) {
+    throw new Error("Error fetching user: " + httpWrappedProfile.errMsg)
+  }
+  const profile = httpWrappedProfile.data;
 
   return {
     props: {
