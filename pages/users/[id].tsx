@@ -95,7 +95,7 @@ const User: React.FC<Props> = ({ firstName, joinDate, walletAddress, nfts }) => 
     {sortedNfts.length > 0 && <div className={`flex min-h-screen flex-col items-center py-24 px-6`}>
       <div className='flex flex-col gap-2 w-full lg:w-3/5'>
         <h1 className="text-6xl">{`Happy Circleversaries, ${firstName}!`}</h1>
-        <h2 className="text-2xl">You joined Circle on {startTime.toLocaleDateString()}, and you'll receive your next
+        <h2 className="text-2xl">You joined Circle on {startTime.toLocaleDateString()}, and you&apos;ll receive your next
           anniversary NFT on {nextTime.toLocaleDateString()}. Congrats!
         </h2>
         <h2 className="text-2xl">Wallet: <Link className='underline' target='_blank' href={`https://polygonscan.com/address/${walletAddress}`}>{walletAddress.substring(0, 7)}...{walletAddress.substring(37)}</Link>. Click on image to see the NFT details</h2>
