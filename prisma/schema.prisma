@@ -9,9 +9,9 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("POSTGRES_PRISMA_URL") // uses connection pooling
-  // directUrl = env("POSTGRES_URL_NON_POOLING") // uses a direct connection
+  provider  = "postgresql"
+  url       = env("POSTGRES_PRISMA_URL") // uses connection pooling
+  directUrl = env("POSTGRES_URL_NON_POOLING") // uses a direct connection
 }
 
 model User {
@@ -28,12 +28,12 @@ model User {
 }
 
 model Nft {
-  id            Int             @id @default(autoincrement())
-  tokenAddress  String
-  tokenId       Int
-  imageUrl      String
-  title         String?
-  description   String?
+  id                     Int             @id @default(autoincrement())
+  tokenAddress           String
+  tokenId                Int
+  imageUrl               String
+  title                  String?
+  description            String?
   pendingUserRedemptions UnredeemedNft[]
 
   @@unique([tokenAddress, tokenId], name: "tokenAddress_tokenId")
