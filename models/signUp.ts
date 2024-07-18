@@ -7,7 +7,11 @@ export interface SignUpRequest {
 export interface SignUpResponse {
   userId: number;
   email: string;
-  walletAddress: string;
   joinDate: number;
+  firstName: string;
+  lastName: string;
+  position?: string;
+
+  walletAddress: string;
   isEmailAlreadyVerified: boolean;
 }

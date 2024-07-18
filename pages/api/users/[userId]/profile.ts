@@ -1,7 +1,7 @@
 import type { NextApiHandler } from "next";
 import {getUserProfile} from "@/handlers/getUserProfile";
 
-const nftsHandler: NextApiHandler = async (
+const userProfileHandler: NextApiHandler = async (
     req,
     res,
 ) => {
@@ -37,4 +37,4 @@ const nftsHandler: NextApiHandler = async (
     }
 }
 
-export default nftsHandler
+export default userProfileHandler

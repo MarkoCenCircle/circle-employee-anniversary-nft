@@ -19,6 +19,7 @@ export type ProfileResponse = {
   firstName: string
   lastName: string
   joinDate: number
+  position?: string
 
   walletAddress: string
   nfts: NftResponse[];
