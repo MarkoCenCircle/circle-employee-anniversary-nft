@@ -19,6 +19,7 @@
     "@circle-fin/user-controlled-wallets": "^4.1.1",
     "@fortawesome/fontawesome-svg-core": "^6.6.0",
     "@fortawesome/free-brands-svg-icons": "^6.6.0",
+    "@fortawesome/free-solid-svg-icons": "^6.6.0",
     "@fortawesome/react-fontawesome": "^0.2.2",
     "@headlessui/react": "^2.1.2",
     "@hookform/resolvers": "^3.9.0",
