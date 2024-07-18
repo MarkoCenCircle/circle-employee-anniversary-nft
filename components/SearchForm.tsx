@@ -1,81 +1,98 @@
-import {type InferType, object, string} from "yup";
-import {useForm} from "react-hook-form";
-import {yupResolver} from "@hookform/resolvers/yup";
+import {useCallback, useEffect, useState} from "react";
+import { Combobox, ComboboxInput, ComboboxOption, ComboboxOptions, Label } from '@headlessui/react'
+import debounce from "lodash.debounce";
+import capitalize from "lodash.capitalize";
 import {useRouter} from "next/router";
-import {useState} from "react";
 
-export const searchSchema = object().shape({
-  email: string()
-    .email('Please enter a circle email.')
-    .trim()
-    .required('Please enter a circle email.')
-    .test(
-      'is-circle-email',
-      'Please enter a valid circle email',
-      email => email.endsWith('circle.com')
-    ),
-})
-
-export type SearchFormValues = InferType<typeof searchSchema>
+type Person = { firstName: string; lastName: string; userId:number; email: string}
 
 export const SearchForm = () => {
   const router = useRouter()
-  const [error, setError] = useState('')
-  const [loading, setLoading] = useState(false)
-  const {register, handleSubmit, formState} = useForm<SearchFormValues>({
-    defaultValues: {
-      email: '',
-    },
-    resolver: yupResolver(searchSchema),
-  })
+  const [loading, setLoading] = useState<boolean>(false)
+  const [users, setUsers] = useState<Person[]>([])
+  const [selectedUser, setSelectedUser] = useState<Person | null | undefined>()
 
-  const onSubmit = async (values: SearchFormValues) => {
+  const setQueryDebounce = useCallback(debounce(async (val: string) => {
+    setLoading(true)
+
     try {
-      if (loading) {
-        return
-      }
-
-      setError('')
-      setLoading(true)
       const headers = new Headers();
       headers.append("Content-Type", "application/json");
 
-      const res = await fetch(`/api/users?email=${values.email}`, {
+      const res = await fetch(`/api/users?email=${val}`, {
         method: 'GET',
         headers,
       })
 
-      const data = await res.json() as { userId: number }[]
+      const data = await res.json() as Person[]
 
-      if (!data || data.length <= 0) {
-        setError('No profile found.')
-      }
-
-      void router.push(`/users/${data[0].userId}`)
-    } catch(ex) {
-      console.error(ex)
+      setUsers(data)
+    } catch {
+      setUsers([])
     } finally {
       setLoading(false)
     }
+
+  }, 1000), [])
+
+  const onSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setQueryDebounce.cancel()
+    void setQueryDebounce(event.target.value)
   }
+
+  const onSelect = (person: Person) => {
+    setSelectedUser(person)
+    if (person) {
+      void router.push(`/users/${person.userId}`)
+    }
+  }
+
+  useEffect(() => {
+    return () => {
+      setQueryDebounce.cancel()
+    }
+  }, [setQueryDebounce])
 
   return <div className="flex min-h-full flex-1 flex-col justify-center w-full">
     <div className="w-full">
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-        <div className="mt-2 flex flex-col gap-1">
-          <input
-            id="email"
-            autoComplete="email"
-            placeholder='Enter Circle email'
-            {...register('email', {required: true})}
-            className="block w-full rounded-md border-0 bg-white/5 p-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-indigo-500 text-xl sm:leading-6"
+      <Combobox
+        as="div"
+        value={selectedUser}
+        onChange={onSelect}
+      >
+        <div className="relative mt-2">
+          <ComboboxInput
+            disabled={loading}
+            placeholder='Search by Circle email'
+            className="disabled:opacity-70 block w-full rounded-md border-0 bg-white/5 p-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-indigo-500 text-xl sm:leading-6"
+            onChange={onSearchChange}
+            displayValue={(person: Person) => person ? `${person?.firstName} ${person?.email}` : ''}
           />
-          {formState.errors.email && <label className="text-red-400">{formState.errors.email.message}</label>}
+
+          {users.length > 0 && (
+            <ComboboxOptions
+              className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-xl shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
+              {users.map((person) => (
+                <ComboboxOption
+                  key={person.userId}
+                  value={person}
+                  className="group relative cursor-default select-none py-2 pl-3 pr-9 text-gray-900 data-[focus]:bg-indigo-600 data-[focus]:text-white"
+                >
+                  <div className="flex">
+                    <span
+                      className="block truncate group-data-[selected]:font-semibold">{capitalize(person.firstName)}</span>
+                    <span
+                      className="ml-2 truncate text-gray-500 group-data-[focus]:text-indigo-200">
+                      {person.email}
+                    </span>
+                  </div>
+
+                </ComboboxOption>
+              ))}
+            </ComboboxOptions>
+          )}
         </div>
-        <div>
-          {error}
-        </div>
-      </form>
+      </Combobox>
     </div>
   </div>
 }

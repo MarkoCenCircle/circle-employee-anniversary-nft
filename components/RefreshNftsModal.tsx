@@ -2,9 +2,9 @@ import { Dialog, DialogBackdrop, DialogPanel, DialogTitle } from '@headlessui/re
 import {VT323} from "next/font/google";
 import {useForm} from "react-hook-form";
 import {yupResolver} from "@hookform/resolvers/yup";
-import {SearchFormValues, searchSchema} from "@/components/SearchForm";
 import {useState} from "react";
 import {SignUpRequest} from "@/models/signUp";
+import {type InferType, object, string} from "yup";
 
 interface Props {
   open: boolean
@@ -13,18 +13,32 @@ interface Props {
 
 const pixelSans = VT323({ weight: ['400'], subsets: ['latin'] });
 
+const emailSchema = object().shape({
+  email: string()
+    .email('Please enter a circle email.')
+    .trim()
+    .required('Please enter a circle email.')
+    .test(
+      'is-circle-email',
+      'Please enter a valid circle email',
+      email => email.endsWith('circle.com')
+    ),
+})
+
+type EmailFormValues = InferType<typeof emailSchema>
+
 export const RefreshNftsModal: React.FC<Props> = ({ open, onClose }) => {
   const [emailSent, setEmailSent] = useState(false)
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
-  const {reset, register, handleSubmit, formState} = useForm<SearchFormValues>({
+  const {reset, register, handleSubmit, formState} = useForm<EmailFormValues>({
     defaultValues: {
       email: '',
     },
-    resolver: yupResolver(searchSchema),
+    resolver: yupResolver(emailSchema),
   })
 
-  const onSubmit = async (values: SearchFormValues) => {
+  const onSubmit = async (values: EmailFormValues) => {
     try {
       if (loading) {
         return
