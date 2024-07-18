@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { FontAwesomeIcon as Icon } from '@fortawesome/react-fontawesome'
+import {FontAwesomeIcon, FontAwesomeIcon as Icon} from '@fortawesome/react-fontawesome'
 import { faFacebook, faTwitter, faLinkedinIn } from '@fortawesome/free-brands-svg-icons'
 import Link from "next/link";
 import {NextSeo, NextSeoProps} from "next-seo";
@@ -12,6 +12,8 @@ import {NftResponse} from "@/models/userProfile";
 import capitalize from 'lodash.capitalize'
 import {TopBar} from "@/components/TopBar";
 import {SearchForm} from "@/components/SearchForm";
+import { faRefresh } from '@fortawesome/free-solid-svg-icons'
+import {RefreshNftsModal} from "@/components/RefreshNftsModal";
 
 interface Props {
   firstName: string;
@@ -28,15 +30,24 @@ const User: React.FC<Props> = ({ firstName, joinDate, walletAddress, nfts }) => 
   const linkedInUrl = `http://www.linkedin.com/shareArticle?mini=true&url=${encodeURI(url)}`
 
   const [modalOpen, setModalOpen] = useState(false)
+  const [refreshModalOpen, setRefreshModalOpen] = useState(false)
   const [token, setToken] = useState<NftResponse>()
 
   const onModalClose = useCallback(() => {
     setModalOpen(false)
   }, [])
 
+  const onRefreshModalClose = useCallback(() => {
+    setRefreshModalOpen(false)
+  }, [])
+
   const onImageClick = useCallback((nft: NftResponse) => {
     setToken(nft)
     setModalOpen(true)
+  }, [])
+
+  const onNftRefreshClick = useCallback(() => {
+    setRefreshModalOpen(true)
   }, [])
 
   const description = `Happy Circleversaries, ${firstName}!`
@@ -109,7 +120,7 @@ const User: React.FC<Props> = ({ firstName, joinDate, walletAddress, nfts }) => 
             </div>
             <div className='flex flex-col'>
               <span className='text-2xl opacity-60 leading-7'>{sortedNfts.length}</span>
-              <span className='text-2xl leading-7'>NFTs</span>
+              <span onClick={onNftRefreshClick} className='text-2xl leading-7 flex items-center gap-1 cursor-pointer' title='Refresh NFTs'>NFTs <FontAwesomeIcon icon={faRefresh} width={15} /></span>
             </div>
 
             <div className='flex flex-col'>
@@ -165,6 +176,7 @@ const User: React.FC<Props> = ({ firstName, joinDate, walletAddress, nfts }) => 
     </div>
 
     <NftDetailsModal open={modalOpen} onClose={onModalClose} token={token}/>
+    <RefreshNftsModal open={refreshModalOpen} onClose={onRefreshModalClose} />
   </>
 }
 

@@ -4,7 +4,7 @@ import {yupResolver} from "@hookform/resolvers/yup";
 import {useRouter} from "next/router";
 import {useState} from "react";
 
-const searchSchema = object().shape({
+export const searchSchema = object().shape({
   email: string()
     .email('Please enter a circle email.')
     .trim()
@@ -16,7 +16,7 @@ const searchSchema = object().shape({
     ),
 })
 
-type SearchFormValues = InferType<typeof searchSchema>
+export type SearchFormValues = InferType<typeof searchSchema>
 
 export const SearchForm = () => {
   const router = useRouter()
