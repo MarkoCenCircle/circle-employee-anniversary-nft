@@ -10,6 +10,8 @@ import {GetServerSideProps} from "next";
 import {getUserProfile} from "@/handlers/getUserProfile";
 import {NftResponse} from "@/models/userProfile";
 import capitalize from 'lodash.capitalize'
+import {TopBar} from "@/components/TopBar";
+import {SearchForm} from "@/components/SearchForm";
 
 interface Props {
   firstName: string;
@@ -84,39 +86,61 @@ const User: React.FC<Props> = ({ firstName, joinDate, walletAddress, nfts }) => 
 
   return <>
     <NextSeo {...seoProps} />
-    <div className='text-2xl fixed w-full py-2 px-6 flex items-center justify-end'>
-      <Link href='/'>Home</Link>
-    </div>
-    {sortedNfts.length <= 0 && <div className='flex min-h-screen flex-col items-center py-36 px-6 gap-6'>
-      <h1 className='text-3xl'>Hold tight, we are minting your anniversary NFTs...</h1>
-      <button onClick={onRefresh} className="flex justify-center rounded-md bg-indigo-500 px-3 py-1.5 text-md font-semibold leading-6 text-white shadow-sm hover:bg-indigo-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500">Refresh</button>
-    </div>}
-
-    {sortedNfts.length > 0 && <div className={`flex min-h-screen flex-col items-center py-24 px-6`}>
+    <TopBar/>
+    <div className='flex min-h-screen flex-col items-center py-36 px-6 gap-6'>
       <div className='flex flex-col gap-2 w-full lg:w-3/5'>
-        <h1 className="text-6xl">{`Happy Circleversaries, ${firstName}!`}</h1>
-        <h2 className="text-2xl">You joined Circle on {startTime.toLocaleDateString()}, and you&apos;ll receive your next
-          anniversary NFT on {nextTime.toLocaleDateString()}. Congrats!
-        </h2>
-        <h2 className="text-2xl">Wallet: <Link className='underline' target='_blank' href={`https://polygonscan.com/address/${walletAddress}`}>{walletAddress.substring(0, 7)}...{walletAddress.substring(37)}</Link>. Click on image to see the NFT details</h2>
-        <div className="text-2xl flex items-center gap-3">
-          <label>Share on</label>
-          <Link href={linkedInUrl} target='_blank' rel="noopener noreferrer">
-            <Icon icon={faLinkedinIn} width={24} color='#0077B5'/>
-          </Link>
-          <Link href={twitterUrl} target='_blank' rel="noopener noreferrer">
-            <Icon icon={faTwitter} width={24} color='#1DA1F2'/>
-          </Link>
-          <Link href={facebookUrl} target='_blank' rel="noopener noreferrer">
-            <Icon icon={faFacebook} width={24} color='#1877F2'/>
-          </Link>
-        </div>
+        <h1 className="text-5xl">Explore your coworker&apos;s NFTs!</h1>
+        <SearchForm/>
       </div>
-      <div className='container mx-auto lg:px-36'>
-        <div className='mt-12 grid grid-flow-row grid-cols-2 md:grid-cols-3 lg:grid-cols-4 w-full'>
+      {sortedNfts.length <= 0 && <>
+        <h1 className='text-3xl'>Hold tight, we are minting your anniversary NFTs...</h1>
+        <button onClick={onRefresh}
+                className="flex justify-center rounded-md bg-indigo-500 px-3 py-1.5 text-md font-semibold leading-6 text-white shadow-sm hover:bg-indigo-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500">Refresh
+        </button>
+      </>}
+      {sortedNfts.length > 0 && <>
+        <div className='flex flex-col xl:flex-row justify-between xl:items-center w-full lg:w-3/5 xl:px-6'>
+          <h1 className="text-5xl">{firstName}</h1>
+          <div className='flex flex-col md:flex-row md:items-center xl:justify-end gap-2 md:gap-16'>
+            <div className='flex flex-col'>
+              <Link className='text-2xl underline opacity-60 leading-7' target='_blank'
+                    href={`https://polygonscan.com/address/${walletAddress}`}>{walletAddress.substring(0, 4)}...{walletAddress.substring(39)}</Link>
+              <span className='text-2xl leading-7'>Wallet</span>
+            </div>
+            <div className='flex flex-col'>
+              <span className='text-2xl opacity-60 leading-7'>{sortedNfts.length}</span>
+              <span className='text-2xl leading-7'>NFTs</span>
+            </div>
+
+            <div className='flex flex-col'>
+              <span className='text-2xl opacity-60 leading-7'>{new Intl.DateTimeFormat('en-US', {
+                month: 'short',
+                day: 'numeric',
+                year: 'numeric'
+              }).format(nextTime)}</span>
+              <span className='text-2xl leading-7'>Next Circleversary</span>
+            </div>
+
+            <div className='flex flex-col'>
+              <div className='text-2xl opacity-60 flex items-center gap-3 mt-1'>
+                <Link href={linkedInUrl} target='_blank' rel="noopener noreferrer">
+                  <Icon icon={faLinkedinIn} width={20} color='#0077B5'/>
+                </Link>
+                <Link href={twitterUrl} target='_blank' rel="noopener noreferrer">
+                  <Icon icon={faTwitter} width={20} color='#1DA1F2'/>
+                </Link>
+                <Link href={facebookUrl} target='_blank' rel="noopener noreferrer">
+                  <Icon icon={faFacebook} width={20} color='#1877F2'/>
+                </Link>
+              </div>
+              <span className='text-2xl leading-12'>Share on</span>
+            </div>
+          </div>
+        </div>
+        <div className='mt-2 w-full lg:w-3/5 grid grid-flow-row grid-cols-2 md:grid-cols-3 xl:grid-cols-4 w-full gap-0'>
           {
             (sortedNfts).map((nft) => {
-              return <div className='mb-10 w-36 h-36 md:w-52 md:h-52 xl:w-60 xl:h-60 relative mx-auto'
+              return <div className='mb-10 w-40 h-40 md:w-52 md:h-52 xl:w-60 xl:h-60 relative mx-auto'
                           key={nft.title}>
                 <Image
                   onClick={() => onImageClick(nft)}
@@ -126,25 +150,26 @@ const User: React.FC<Props> = ({ firstName, joinDate, walletAddress, nfts }) => 
               </div>
             })
           }
-          {
-            restBlocks.map((num) => (
-              <div className='mb-10 w-36 h-36 md:w-52 md:h-52 xl:w-60 xl:h-60 relative mx-auto'
-                   key={num}>
-                <div className='w-full h-full border rounded-2xl border-amber-100 border-dashed'></div>
-              </div>
-              )
-            )
-          }
+          <div className='mb-10 w-36 h-36 md:w-52 md:h-52 xl:w-60 xl:h-60 relative mx-auto'>
+            <div className='px-6 w-full h-full border rounded-2xl border-amber-100 border-dashed flex flex-col items-start justify-center'>
+              <span className='text-xl text-gray-400'>Coming Soon</span>
+              <span className='text-xl text-gray-400'>Next Circleversary NFT will be minted {new Intl.DateTimeFormat('en-US', {
+                month: 'short',
+                day: 'numeric',
+                year: 'numeric'
+              }).format(nextTime)}</span>
+            </div>
+          </div>
         </div>
-      </div>
+      </>}
     </div>
-    }
+
     <NftDetailsModal open={modalOpen} onClose={onModalClose} token={token}/>
   </>
 }
 
 export const getServerSideProps: GetServerSideProps = async ({query}) => {
-  const {id } = query as { id: string }
+  const {id} = query as { id: string }
   const profile = await getUserProfile({
     userId: Number(id)
   })
