@@ -4,7 +4,7 @@ import debounce from "lodash.debounce";
 import capitalize from "lodash.capitalize";
 import {useRouter} from "next/router";
 
-type Person = { firstName: string; lastName: string; userId:number; email: string}
+type Person = { firstName: string; userId:number; email: string}
 
 export const SearchForm = () => {
   const router = useRouter()

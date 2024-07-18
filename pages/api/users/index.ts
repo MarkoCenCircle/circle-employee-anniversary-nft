@@ -31,9 +31,6 @@ const searchUsersHandler: NextApiHandler = async (
                   (_, a, b, c) => a + b.replace(/./g, '*').replace(/\*+/g, '****') + c
                 ), // mask email
                 firstName: user.firstName,
-                lastName: user.lastName,
-                joinDate: dateToUnixSeconds(user.employmentStartDate),
-                position: user.position
             }
         }))
     } else {
