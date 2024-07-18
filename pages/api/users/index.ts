@@ -1,6 +1,5 @@
 import type { NextApiHandler } from "next";
 import prisma from '../../../prisma'
-import { validateEmail, normalizeEmail } from '../common/email'
 import { dateToUnixSeconds } from '../common/time'
 
 const searchUsersHandler: NextApiHandler = async (
@@ -9,22 +8,17 @@ const searchUsersHandler: NextApiHandler = async (
 ) => {
     if (req.method === 'GET') {
         // Parse and validate query parameters
-        let email: string = (req.query.email as string ?? '')
-        if (!email || !validateEmail(email)) {
-            res.json([])
-            return
-        }
-        email = normalizeEmail(email)
+        let queryTerm: string = (req.query.email as string ?? '')
 
-      // Search DB for users
+        // Search DB for users
         let users = await prisma.user.findMany({
             where: {
                 email: {
-                    contains: email
+                    contains: queryTerm
                 },
                 isVerified: true
             },
-            take: 20,
+            take: 25,
         })
 
         // Build and send response
