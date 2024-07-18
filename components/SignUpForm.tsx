@@ -4,7 +4,7 @@ import {useForm} from "react-hook-form";
 import {yupResolver} from "@hookform/resolvers/yup";
 import {SignUpRequest} from "@/models/signUp";
 import {useState} from "react";
-import {router} from "next/client";
+import {useRouter} from "next/router";
 
 const signUpSchema = object().shape({
   email: string()
@@ -36,6 +36,7 @@ const signUpSchema = object().shape({
 type SignUpFormValues = InferType<typeof signUpSchema>
 
 export const SignUpForm = () => {
+  const router = useRouter()
   const [emailSent, setEmailSent] = useState(false)
   const [loading, setLoading] = useState(false)
 
