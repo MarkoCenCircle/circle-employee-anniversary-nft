@@ -4,6 +4,7 @@ import {useForm} from "react-hook-form";
 import {yupResolver} from "@hookform/resolvers/yup";
 import {SignUpRequest} from "@/models/signUp";
 import {useState} from "react";
+import {useRouter} from "next/router";
 
 const signUpSchema = object().shape({
   email: string()
@@ -35,6 +36,7 @@ const signUpSchema = object().shape({
 type SignUpFormValues = InferType<typeof signUpSchema>
 
 export const SignUpForm = () => {
+  const router = useRouter()
   const [emailSent, setEmailSent] = useState(false)
   const [loading, setLoading] = useState(false)
 
@@ -61,7 +63,7 @@ export const SignUpForm = () => {
       const headers = new Headers();
       headers.append("Content-Type", "application/json");
 
-      await fetch('/api/signup',{
+      const res = await fetch('/api/signup',{
         method: 'POST',
         body: JSON.stringify({
           email: values.email,
@@ -70,7 +72,13 @@ export const SignUpForm = () => {
         headers
       })
 
-      setEmailSent(true)
+      const data = await res.json()
+
+      if (data.isEmailAlreadyVerified) {
+        void router.replace(`/users/${data.userId}`)
+      } else {
+        setEmailSent(true)
+      }
     } catch(ex) {
       console.error(ex)
     }
