@@ -1,7 +1,7 @@
 import "@/styles/globals.css";
 import type { AppProps } from "next/app";
 import {DefaultSeo, DefaultSeoProps } from "next-seo";
-import {Pixelify_Sans} from "next/font/google";
+import {VT323} from "next/font/google";
 
 const seoOptions: DefaultSeoProps = {
   defaultTitle: 'Circle Anniversary NFTs',
@@ -32,7 +32,7 @@ const seoOptions: DefaultSeoProps = {
   }
 }
 
-const pixelSans = Pixelify_Sans({ subsets: ['latin'] });
+const pixelSans = VT323({ weight: ['400'], subsets: ['latin'] });
 
 export default function App({ Component, pageProps }: AppProps) {
   return <>

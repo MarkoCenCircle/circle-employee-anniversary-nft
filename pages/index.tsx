@@ -12,13 +12,13 @@ export default function Home() {
   return (
     <div className={`flex min-h-screen flex-col items-center py-24 px-12`}>
       <div className='flex items-center flex-col gap-2'>
-        <h1 className="text-5xl">Circle Anniversary NFTs</h1>
-        <h2 className="text-2xl">Sign up to receive NFTs on your Circle anniversaries!</h2>
+        <h1 className="text-6xl">Circle Anniversary NFTs</h1>
+        <h2 className="text-3xl">Sign up to receive NFTs on your Circle anniversaries!</h2>
       </div>
       <div className='flex items-center flex-col gap-2 w-full'>
         {!isSignIn && <SignUpForm/>}
         {isSignIn && <SignInForm/>}
-        <p className="mt-5 text-center text-md text-gray-400">
+        <p className="mt-5 text-center text-xl text-gray-400">
           {!isSignIn ? 'Already sign up?' : 'Haven\'t sign up?'}{' '}
           <button onClick={onSwitch} className="font-semibold leading-6 text-indigo-400 hover:text-indigo-300">
             {!isSignIn ? 'View your NFTs here' : 'Sign up here'}

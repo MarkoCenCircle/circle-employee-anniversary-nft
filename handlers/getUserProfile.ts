@@ -70,7 +70,6 @@ export const getUserProfile = async ({ userId }: Input): Promise<ProfileResponse
     firstName: user.firstName,
     lastName: user.lastName,
     joinDate: dateToUnixSeconds(user.employmentStartDate),
-
     walletAddress: walletAddress,
     nfts: nftsResponse
   };
