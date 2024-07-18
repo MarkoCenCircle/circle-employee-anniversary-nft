@@ -2,8 +2,7 @@ import { object, string } from 'yup'
 import type { InferType } from 'yup'
 import {useForm} from "react-hook-form";
 import {yupResolver} from "@hookform/resolvers/yup";
-import {SignUpRequest, SignUpResponse} from "@/models/signUp";
-import {useRouter} from "next/router";
+import {SignUpRequest} from "@/models/signUp";
 import {useState} from "react";
 
 const signUpSchema = object().shape({
@@ -36,7 +35,7 @@ const signUpSchema = object().shape({
 type SignUpFormValues = InferType<typeof signUpSchema>
 
 export const SignUpForm = () => {
-  const router = useRouter()
+  const [emailSent, setEmailSent] = useState(false)
   const [loading, setLoading] = useState(false)
 
   const { register, handleSubmit, formState} = useForm<SignUpFormValues>({
@@ -62,21 +61,16 @@ export const SignUpForm = () => {
       const headers = new Headers();
       headers.append("Content-Type", "application/json");
 
-      const res = await fetch('/api/signup',{
+      await fetch('/api/signup',{
         method: 'POST',
         body: JSON.stringify({
           email: values.email,
-          joinDate: joinDate.getTime()
+          joinDate: joinDate.getTime() / 1000
         } as SignUpRequest),
         headers
       })
 
-      const data = await res.json() as SignUpResponse
-
-      void router.push({
-        pathname: `/users/[id]`,
-        query: { id: data. userId }
-      })
+      setEmailSent(true)
     } catch(ex) {
       console.error(ex)
     }
@@ -87,7 +81,7 @@ export const SignUpForm = () => {
 
   return <div className="flex min-h-full flex-1 flex-col justify-center w-full">
     <div className="mt-10 sm:mx-auto sm:w-full sm:max-w-md">
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+      {!emailSent && <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
         <div>
           <label htmlFor="email" className="block text-xl font-medium leading-6 text-white">
             Your Circle Email
@@ -129,7 +123,11 @@ export const SignUpForm = () => {
             {loading ? 'Loading...' : 'Sign up'}
           </button>
         </div>
-      </form>
+      </form>}
+      {emailSent && <div className='w-full text-center'>
+        <h2 className='text-2xl'>Check your inbox to confirm your account.</h2>
+        <h2 className='text-2xl'>It can take 2-3 minutes to receive the email.</h2>
+      </div>}
     </div>
   </div>
 }
