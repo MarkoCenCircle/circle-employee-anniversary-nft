@@ -22,14 +22,15 @@ const searchUsersHandler: NextApiHandler = async (
         })
 
         // Build and send response
-        res.json(users.map(user => {
-            return { 
-                userId: user.id, 
-                email: user.email,
+        res.json(users
+          .filter(u => u.isVerified) // only return verified profile
+          .map(user => {
+            return {
+                userId: user.id,
+                email: user.email.replace(/^(.)(.*)(.@.*)$/,
+                  (_, a, b, c) => a + b.replace(/./g, '*').replace(/\*+/g, '****') + c
+                ), // mask email
                 firstName: user.firstName,
-                lastName: user.lastName,
-                joinDate: dateToUnixSeconds(user.employmentStartDate),
-                position: user.position
             }
         }))
     } else {
