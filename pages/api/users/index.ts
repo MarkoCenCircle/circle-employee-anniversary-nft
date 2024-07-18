@@ -1,5 +1,6 @@
 import type { NextApiHandler } from "next";
 import prisma from '../../../prisma'
+import { validateEmail, normalizeEmail } from '../common/email'
 
 const nftsHandler: NextApiHandler = async (
     req,
@@ -7,35 +8,28 @@ const nftsHandler: NextApiHandler = async (
 ) => {
     if (req.method === 'GET') {
         // Parse and validate query parameters
-        let email: string = (req.query.email as string ?? '').trim()
-
-        if (!email) {
+        let email: string = (req.query.email as string ?? '')
+        if (!email || !validateEmail(email)) {
             res.json([])
             return
         }
-
-      // remove the alias part
-      email = email.replace(/\+.*@/, '@')
+        email = normalizeEmail(email)
 
       // Search DB for users
         let users = await prisma.user.findMany({
             where: {
                 email: {
                     contains: email
-                }
+                },
+                isVerified: true
             },
             take: 20,
         })
 
         // Build and send response
-        const foundUsers = [];
-        for (let i = 0; i < users.length; i++) {
-            const user = users[i];
-            foundUsers.push({
-                userId: user.id,
-            })
-        }
-        res.json(foundUsers)
+        res.json(users.map(user => {
+            return { userId: user.id, userEmail: user.email }
+        }))
     } else {
         res.status(405).end('405 Method Not Allowed')
     }

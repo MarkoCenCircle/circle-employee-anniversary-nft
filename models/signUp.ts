@@ -1,4 +1,3 @@
-
 export interface SignUpRequest {
   email: string;
   joinDate: number;
@@ -10,4 +9,5 @@ export interface SignUpResponse {
   email: string;
   walletAddress: string;
   joinDate: number;
+  isEmailAlreadyVerified: boolean;
 }

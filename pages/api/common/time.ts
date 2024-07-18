@@ -7,3 +7,7 @@ export function getYearsElapsed(fromDate: Date) {
 export function dateToUnixSeconds(date: Date) {
     return Math.floor(date.getTime() / 1000);
 }
+
+export function unixSecondsToDate(unixSeconds: number) {
+    return new Date(unixSeconds * 1000)
+}

@@ -10,7 +10,7 @@ export type NftResponse = {
 type NftCompanyOwnerResponse = {
   companyName: string
   companyDomain: string
-  companyFoundingDate: number
+  companyFoundingDate: string
 }
 
 export type ProfileResponse = {

@@ -1,19 +1,23 @@
 import prisma from "@/prisma";
-import {getDevWalletsClient} from "@/pages/api/circle";
-import {dateToUnixSeconds} from "@/pages/api/utils/time";
-import {NftResponse, ProfileResponse} from "@/models/userProfile";
+import {getDevWalletsClient} from "@/pages/api/common/circle";
+import {dateToUnixSeconds} from "@/pages/api/common/time";
+import { HttpResponseWrapper } from "@/models/httpResponse";
+import { NftResponse, ProfileResponse } from "@/models/userProfile";
 
 interface Input {
   userId: number
 }
 
-export const getUserProfile = async ({ userId }: Input): Promise<ProfileResponse> => {
-  let user = await prisma.user.findFirst({
-    where: { id: userId }
+export const getUserProfile = async ({ userId }: Input): Promise<HttpResponseWrapper<ProfileResponse>> => {
+  let user = await prisma.user.findUnique({
+    where: { 
+        id: userId,
+        isVerified: true
+    }
   })
 
   if (!user) {
-    throw new Error('user not found')
+    return { httpStatus: 404, errMsg: 'User not found' }
   }
 
   // Get wallet address
@@ -24,17 +28,19 @@ export const getUserProfile = async ({ userId }: Input): Promise<ProfileResponse
   });
 
   if (!userWallet.data) {
-    throw new Error('Unable to find user wallet in Circle SDKs')
+    return { httpStatus: 404, errMsg: 'Unable to find user wallet in Circle SDKs' }
   }
 
   const walletAddress = userWallet.data?.wallet.address;
 
+  // TODO future: need to handle pagination if we reach > 50 NFTs per wallet
   // Get token balances from Circle SDK
   const walletNftBalances = await circlePwClient.getWalletNFTBalance({
-    id: user.circleWalletId
+    id: user.circleWalletId,
+    pageSize: 50
   })
   if (!walletNftBalances.data) {
-    throw new Error('Unable to find user wallet')
+    return { httpStatus: 404, errMsg: 'Unable to find user wallet' }
   }
 
   console.log(`Retrieved ${walletNftBalances.data.nfts?.length ?? 0} NFTs from PW for wallet ${user.circleWalletId}`)
@@ -43,12 +49,15 @@ export const getUserProfile = async ({ userId }: Input): Promise<ProfileResponse
   let nftsResponse: NftResponse[] = []
 
   if (walletNftBalances.data.nfts) {
-    // TODO: optimize
+    // TODO future: optimize
     await Promise.all(walletNftBalances.data.nfts.map(async (pwNft) => {
-      const nftMetadata = await prisma.nft.findFirst({
+      if (!pwNft.token.tokenAddress) return
+      const nftMetadata = await prisma.nft.findUnique({
         where: {
-          tokenAddress: pwNft.token.tokenAddress,
-          tokenId: parseInt(pwNft.nftTokenId)
+            tokenAddress_tokenId: {
+                tokenAddress: pwNft.token.tokenAddress,
+                tokenId: parseInt(pwNft.nftTokenId)
+            }
         }
       })
       if (!nftMetadata) return
@@ -63,15 +72,18 @@ export const getUserProfile = async ({ userId }: Input): Promise<ProfileResponse
     }))
   }
 
-  // Build and send response
-  return {
-    userId: user.id,
-    email: user.email,
-    firstName: user.firstName,
-    lastName: user.lastName,
-    joinDate: dateToUnixSeconds(user.employmentStartDate),
+    // Build and send response
+    return {
+        httpStatus: 200,
+        data: {
+            userId: user.id,
+            email: user.email,
+            firstName: user.firstName,
+            lastName: user.lastName,
+            joinDate: dateToUnixSeconds(user.employmentStartDate),
 
-    walletAddress: walletAddress,
-    nfts: nftsResponse
-  };
+            walletAddress: walletAddress,
+            nfts: nftsResponse,
+        },
+    };
 }
