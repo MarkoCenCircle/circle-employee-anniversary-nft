@@ -1,8 +1,9 @@
 import type { NextApiHandler } from "next";
 import prisma from '../../../prisma'
 import { validateEmail, normalizeEmail } from '../common/email'
+import { dateToUnixSeconds } from '../common/time'
 
-const nftsHandler: NextApiHandler = async (
+const searchUsersHandler: NextApiHandler = async (
     req,
     res,
 ) => {
@@ -28,11 +29,18 @@ const nftsHandler: NextApiHandler = async (
 
         // Build and send response
         res.json(users.map(user => {
-            return { userId: user.id, userEmail: user.email }
+            return { 
+                userId: user.id, 
+                email: user.email,
+                firstName: user.firstName,
+                lastName: user.lastName,
+                joinDate: dateToUnixSeconds(user.employmentStartDate),
+                position: user.position
+            }
         }))
     } else {
         res.status(405).end('405 Method Not Allowed')
     }
 }
 
-export default nftsHandler
+export default searchUsersHandler

@@ -110,8 +110,12 @@ const signupHandler: NextApiHandler<void> = async (
         res.json({
             userId: user.id,
             email: user.email,
-            walletAddress: userWallet.address,
             joinDate: dateToUnixSeconds(user.employmentStartDate),
+            firstName: user.firstName,
+            lastName: user.lastName,
+            position: user.position,
+
+            walletAddress: userWallet.address,
             isEmailAlreadyVerified: user.isVerified
         } as SignUpResponse)
     } else {

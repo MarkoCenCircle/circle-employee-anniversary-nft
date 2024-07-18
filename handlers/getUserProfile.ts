@@ -80,6 +80,7 @@ export const getUserProfile = async ({ userId }: Input): Promise<HttpResponseWra
             email: user.email,
             firstName: user.firstName,
             lastName: user.lastName,
+            position: user.position ?? undefined,
             joinDate: dateToUnixSeconds(user.employmentStartDate),
 
             walletAddress: walletAddress,

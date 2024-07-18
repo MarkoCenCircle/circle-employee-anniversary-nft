@@ -52,7 +52,7 @@ async function mintDbUnredeemedNfts(userWalletAddress: string, userUnredeemedNft
     return didMintNewNfts;
 }
 
-const nftsHandler: NextApiHandler = async (
+const redeemNftsHandler: NextApiHandler = async (
     req,
     res,
 ) => {
@@ -133,4 +133,4 @@ const nftsHandler: NextApiHandler = async (
     }
 }
 
-export default nftsHandler
+export default redeemNftsHandler

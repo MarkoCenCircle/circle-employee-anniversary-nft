@@ -4,7 +4,7 @@ import prisma from '../../../../prisma'
 import {NftResponse} from "@/models/userProfile";
 
 
-const nftsHandler: NextApiHandler = async (
+const nftMetadataHandler: NextApiHandler = async (
     req,
     res,
 ) => {
@@ -54,4 +54,4 @@ const nftsHandler: NextApiHandler = async (
     }
 }
 
-export default nftsHandler
+export default nftMetadataHandler
