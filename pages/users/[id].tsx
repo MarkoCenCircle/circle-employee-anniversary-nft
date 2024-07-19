@@ -56,7 +56,10 @@ const User: React.FC<Props> = ({ firstName, joinDate, walletAddress, nfts }) => 
 
   const startTime = new Date(joinDate ? joinDate * 1000 : Date.now())
   const nextTime = new Date(joinDate ? joinDate * 1000 : Date.now())
-  nextTime.setFullYear(nextTime.getFullYear() + 1)
+  nextTime.setFullYear(new Date().getFullYear())
+  if (nextTime < new Date()) {
+    nextTime.setFullYear(new Date().getFullYear() + 1)
+  } 
 
   const sortedNfts = nfts ? [...nfts.sort((a,b) => a.tokenId > b.tokenId ? 1 : -1)] : []
 
