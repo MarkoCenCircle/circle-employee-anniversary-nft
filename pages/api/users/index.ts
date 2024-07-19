@@ -16,7 +16,8 @@ const searchUsersHandler: NextApiHandler = async (
         let users = await prisma.user.findMany({
             where: {
                 email: {
-                    contains: queryTerm
+                    contains: queryTerm,
+                    mode: 'insensitive'
                 },
                 isVerified: true
             },
