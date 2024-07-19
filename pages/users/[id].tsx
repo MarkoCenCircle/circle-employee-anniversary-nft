@@ -16,13 +16,13 @@ import { faRefresh } from '@fortawesome/free-solid-svg-icons'
 import {RefreshNftsModal} from "@/components/RefreshNftsModal";
 
 interface Props {
-  firstName: string;
+  name: string;
   joinDate: number;
   walletAddress: string;
   nfts: NftResponse[]
 }
 
-const User: React.FC<Props> = ({ firstName, joinDate, walletAddress, nfts }) => {
+const User: React.FC<Props> = ({ name, joinDate, walletAddress, nfts }) => {
   const router = useRouter()
   const url = `https://circle-employee-anniversary-nft.vercel.app${router.asPath}`
   const twitterUrl = `https://twitter.com/intent/tweet?url=${encodeURI(url)}`
@@ -50,7 +50,7 @@ const User: React.FC<Props> = ({ firstName, joinDate, walletAddress, nfts }) => 
     setRefreshModalOpen(true)
   }, [])
 
-  const description = `Happy Circleversaries, ${firstName}!`
+  const description = `Happy Circleversaries, ${name}!`
 
   const restBlocks = Array(12 - nfts.length).fill(1)
 
@@ -114,7 +114,7 @@ const User: React.FC<Props> = ({ firstName, joinDate, walletAddress, nfts }) => 
       </>}
       {sortedNfts.length > 0 && <>
         <div className='flex flex-col xl:flex-row justify-between xl:items-center w-full lg:w-3/5 xl:px-6'>
-          <h1 className="text-5xl">{firstName}</h1>
+          <h1 className="text-5xl">{name}</h1>
           <div className='flex flex-col md:flex-row md:items-center xl:justify-end gap-2 md:gap-16'>
             <div className='flex flex-col'>
               <Link className='text-2xl underline opacity-60 leading-7' target='_blank'
@@ -183,7 +183,7 @@ const User: React.FC<Props> = ({ firstName, joinDate, walletAddress, nfts }) => 
   </>
 }
 
-export const getServerSideProps: GetServerSideProps = async ({ query }) => {
+export const getServerSideProps: GetServerSideProps<Props> = async ({ query }) => {
   const { id } = query as { id: string }
   const httpWrappedProfile = await getUserProfile({
     userId: Number(id)
@@ -195,7 +195,7 @@ export const getServerSideProps: GetServerSideProps = async ({ query }) => {
 
   return {
     props: {
-      firstName: capitalize(profile.firstName),
+      name: profile.name,
       joinDate: profile.joinDate,
       walletAddress: profile.walletAddress,
       nfts: profile.nfts

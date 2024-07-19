@@ -30,3 +30,9 @@ export function validateEmail(emailAddress: string): boolean {
 export function normalizeEmail(emailAddress: string) {
     return emailAddress.trim().replace(/\+.*@/, '@')    // remove the alias part
 }
+
+export function maskEmail(emailAddress: string) {
+    return emailAddress?.replace(/^(.)(.*)(.@.*)$/,
+        (_, a, b, c) => a + b.replace(/./g, '*').replace(/\*+/g, '****') + c
+    )
+}

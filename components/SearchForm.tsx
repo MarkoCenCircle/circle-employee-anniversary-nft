@@ -6,7 +6,7 @@ import {useRouter} from "next/router";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faMagnifyingGlass, faSpinner} from "@fortawesome/free-solid-svg-icons";
 
-type Person = { firstName: string; userId:number; email: string}
+type Person = { name: string; userId:number; email: string}
 
 export const SearchForm = () => {
   const router = useRouter()
@@ -67,7 +67,7 @@ export const SearchForm = () => {
             placeholder='Search by Circle email'
             className="block w-full rounded-md border-0 bg-white/5 p-1.5 pl-8 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-indigo-500 text-xl sm:leading-6"
             onChange={onSearchChange}
-            displayValue={(person: Person) => person ? `${person?.firstName}` : ''}
+            displayValue={(person: Person) => person ? `${person.name}` : ''}
           />
           <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-1">
             <FontAwesomeIcon icon={loading ? faSpinner : faMagnifyingGlass} className={loading ? 'fa-spin opacity-50' : 'opacity-50'} width={25} height={25}/>
@@ -84,7 +84,7 @@ export const SearchForm = () => {
                 >
                   <div className="flex">
                     <span
-                      className="block truncate group-data-[selected]:font-semibold">{capitalize(person.firstName)}</span>
+                      className="block truncate group-data-[selected]:font-semibold">{person.name}</span>
                     <span
                       className="ml-2 truncate text-gray-500 group-data-[focus]:text-indigo-200">
                       {person.email}

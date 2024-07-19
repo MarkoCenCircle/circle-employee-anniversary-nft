@@ -1,6 +1,8 @@
 import type { NextApiHandler } from "next";
 import prisma from '../../../prisma'
 import { dateToUnixSeconds } from '../common/time'
+import { maskEmail } from "../common/email";
+import { maskFullName } from "../common";
 
 const searchUsersHandler: NextApiHandler = async (
     req,
@@ -27,10 +29,8 @@ const searchUsersHandler: NextApiHandler = async (
           .map(user => {
             return {
                 userId: user.id,
-                email: user.email.replace(/^(.)(.*)(.@.*)$/,
-                  (_, a, b, c) => a + b.replace(/./g, '*').replace(/\*+/g, '****') + c
-                ), // mask email
-                firstName: user.firstName,
+                email: maskEmail(user.email),
+                name: maskFullName(user.firstName, user.lastName),
             }
         }))
     } else {
