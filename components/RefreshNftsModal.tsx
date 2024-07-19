@@ -88,7 +88,7 @@ export const RefreshNftsModal: React.FC<Props> = ({ open, onClose }) => {
             className="min-h-full relative transform overflow-hidden rounded-lg bg-[#29233b] px-4 pb-6 pt-5 text-left shadow-xl transition-all data-[closed]:translate-y-4 data-[closed]:opacity-0 data-[enter]:duration-300 data-[leave]:duration-200 data-[enter]:ease-out data-[leave]:ease-in sm:my-8 sm:w-full sm:max-w-3xl sm:p-6 data-[closed]:sm:translate-y-0 data-[closed]:sm:scale-95"
           >
             <DialogTitle className='text-3xl'>Check New NFTs</DialogTitle>
-            {!emailSent && <DialogTitle className='text-xl'>Enter the associated Circle email to refresh the NFT collection</DialogTitle>}
+            {!emailSent && <DialogTitle className='text-xl'>Enter the Circle email associated with this profile to refresh the NFT collection</DialogTitle>}
             {!emailSent && <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
               <div className="mt-2 flex flex-col gap-1">
                 <input
