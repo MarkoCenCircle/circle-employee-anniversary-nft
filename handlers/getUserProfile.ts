@@ -3,6 +3,8 @@ import {getDevWalletsClient} from "@/pages/api/common/circle";
 import {dateToUnixSeconds} from "@/pages/api/common/time";
 import { HttpResponseWrapper } from "@/models/httpResponse";
 import { NftResponse, ProfileResponse } from "@/models/userProfile";
+import { maskEmail } from "@/pages/api/common/email";
+import { maskFullName } from "@/pages/api/common";
 
 interface Input {
   userId: number
@@ -77,9 +79,8 @@ export const getUserProfile = async ({ userId }: Input): Promise<HttpResponseWra
         httpStatus: 200,
         data: {
             userId: user.id,
-            email: user.email,
-            firstName: user.firstName,
-            lastName: user.lastName,
+            email: maskEmail(user.email),
+            name: maskFullName(user.firstName, user.lastName),
             position: user.position ?? undefined,
             joinDate: dateToUnixSeconds(user.employmentStartDate),
 

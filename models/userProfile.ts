@@ -16,8 +16,7 @@ type NftCompanyOwnerResponse = {
 export type ProfileResponse = {
   userId: number
   email: string
-  firstName: string
-  lastName: string
+  name: string
   joinDate: number
   position?: string
 
