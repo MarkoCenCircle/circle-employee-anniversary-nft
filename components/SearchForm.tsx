@@ -3,6 +3,8 @@ import { Combobox, ComboboxInput, ComboboxOption, ComboboxOptions, Label } from 
 import debounce from "lodash.debounce";
 import capitalize from "lodash.capitalize";
 import {useRouter} from "next/router";
+import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
+import {faMagnifyingGlass, faSpinner} from "@fortawesome/free-solid-svg-icons";
 
 type Person = { firstName: string; userId:number; email: string}
 
@@ -62,12 +64,14 @@ export const SearchForm = () => {
       >
         <div className="relative mt-2">
           <ComboboxInput
-            disabled={loading}
             placeholder='Search by Circle email'
-            className="disabled:opacity-70 block w-full rounded-md border-0 bg-white/5 p-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-indigo-500 text-xl sm:leading-6"
+            className="block w-full rounded-md border-0 bg-white/5 p-1.5 pl-8 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-indigo-500 text-xl sm:leading-6"
             onChange={onSearchChange}
-            displayValue={(person: Person) => person ? `${person?.firstName} ${person?.email}` : ''}
+            displayValue={(person: Person) => person ? `${person?.firstName}` : ''}
           />
+          <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-1">
+            <FontAwesomeIcon icon={loading ? faSpinner : faMagnifyingGlass} className={loading ? 'fa-spin opacity-50' : 'opacity-50'} width={25} height={25}/>
+          </div>
 
           {users.length > 0 && (
             <ComboboxOptions
