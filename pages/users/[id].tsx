@@ -167,7 +167,7 @@ const User: React.FC<Props> = ({ name, joinDate, walletAddress, nfts }) => {
           <div className='w-40 h-40 md:w-52 md:h-52 xl:w-60 xl:h-60 relative mx-auto'>
             <div className='p-6 w-full h-full border rounded-2xl border-amber-100 border-dashed flex flex-col items-start justify-center'>
               <span className='text-xl text-gray-400'>Coming Soon</span>
-              <span className='text-xl text-gray-400'>Your next NFT will be minted {new Intl.DateTimeFormat('en-US', {
+              <span className='text-xl text-gray-400'>Your next Circleversary NFT will be redeemable on {new Intl.DateTimeFormat('en-US', {
                 month: 'short',
                 day: 'numeric',
                 year: 'numeric'
