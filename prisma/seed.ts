@@ -12,8 +12,8 @@ const BUDDING_WEB3_DEV_NFT_TOKEN_ID = 10000;
 
 async function seedBuddingWeb3DevNft() {
     const nftTitle = `Budding Web3 Developer`
-    const nftDescription = `Given to those who successfully execute mintWeb3BuddingDevNft() function on the Circle Achievement NFT contract (with their user wallet address as the argument). Can be done via any Web3 ecosystem tool. Note: you need to send 0.05 MATIC along with the contract execution (should only be a few cents).`
-    const nftImageUrl = `https://circle-employee-anniversary-nft.vercel.app/nft-pics/0.png`;
+    const nftDescription = `Given to those who successfully execute mintWeb3BuddingDevNft(address) function on the Circle Achievement NFT contract (with their user wallet address as the argument). Can be done via any Web3 ecosystem tool. Note: you need to send 0.05 MATIC along with the contract execution (should only be a few cents).`
+    const nftImageUrl = `https://circle-employee-anniversary-nft.vercel.app/nft-pics/${BUDDING_WEB3_DEV_NFT_TOKEN_ID}.png`;
 
     const nft = await seedNftMetadataHelper(BUDDING_WEB3_DEV_NFT_TOKEN_ID, nftTitle, nftDescription, nftImageUrl);
     console.log("Upserted nft ", nft);

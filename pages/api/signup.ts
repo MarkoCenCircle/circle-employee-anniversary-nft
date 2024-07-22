@@ -42,8 +42,12 @@ const signupHandler: NextApiHandler<void> = async (
     if (req.method === 'POST') {
         // Request body validation
         const payload = req.body as SignUpRequest
+
+        // Validate join date of employee. To allow some buffer for very early employees, the minimum join date
+        //  is 90 days before the official company founding date.
         const companyFoundingDate = await getNftOwnerCompanyFoundingDate();
-        if (payload.joinDate < companyFoundingDate) {
+        const joinDateCutoff = companyFoundingDate - (90 * 24 * 60 * 60)    // subtract 90 days
+        if (payload.joinDate < joinDateCutoff) {
             res.status(400).json('Invalid start date. Please make sure your time stamp is in Unix seconds.')
             return
         }
