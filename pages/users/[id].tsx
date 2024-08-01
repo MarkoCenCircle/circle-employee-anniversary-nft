@@ -52,14 +52,14 @@ const User: React.FC<Props> = ({ name, joinDate, walletAddress, nfts }) => {
 
   const description = `Happy Circleversaries, ${name}!`
 
-  const restBlocks = Array(12 - nfts.length).fill(1)
-
-  const startTime = new Date(joinDate ? joinDate * 1000 : Date.now())
-  const nextTime = new Date(joinDate ? joinDate * 1000 : Date.now())
-  nextTime.setFullYear(new Date().getFullYear())
-  if (nextTime < new Date()) {
-    nextTime.setFullYear(new Date().getFullYear() + 1)
+  const nextAnniversary = new Date(joinDate ? joinDate * 1000 : Date.now())
+  nextAnniversary.setFullYear(new Date().getFullYear())
+  if (nextAnniversary < new Date()) {
+    nextAnniversary.setFullYear(new Date().getFullYear() + 1)
   } 
+
+  const nextAnniversaryMonth = new Intl.DateTimeFormat('en', {month: 'short'}).format(nextAnniversary)
+  const nextAnniversaryFormatted = `${nextAnniversaryMonth} ${nextAnniversary.getUTCDate()}, ${nextAnniversary.getUTCFullYear()}`;
 
   const sortedNfts = nfts ? [...nfts.sort((a,b) => a.tokenId > b.tokenId ? 1 : -1)] : []
 
@@ -127,11 +127,7 @@ const User: React.FC<Props> = ({ name, joinDate, walletAddress, nfts }) => {
             </div>
 
             <div className='flex flex-col'>
-              <span className='text-2xl opacity-60 leading-7'>{new Intl.DateTimeFormat('en-US', {
-                month: 'short',
-                day: 'numeric',
-                year: 'numeric'
-              }).format(nextTime)}</span>
+              <span className='text-2xl opacity-60 leading-7'>{nextAnniversaryFormatted}</span>
               <span className='text-2xl leading-7'>Next Circleversary</span>
             </div>
 
@@ -167,11 +163,7 @@ const User: React.FC<Props> = ({ name, joinDate, walletAddress, nfts }) => {
           <div className='w-40 h-40 md:w-52 md:h-52 xl:w-60 xl:h-60 relative mx-auto'>
             <div className='p-6 w-full h-full border rounded-2xl border-amber-100 border-dashed flex flex-col items-start justify-center'>
               <span className='text-xl text-gray-400'>Coming Soon</span>
-              <span className='text-xl text-gray-400'>Your next Circleversary NFT will be redeemable on {new Intl.DateTimeFormat('en-US', {
-                month: 'short',
-                day: 'numeric',
-                year: 'numeric'
-              }).format(nextTime)}</span>
+              <span className='text-xl text-gray-400'>Your next Circleversary NFT will be redeemable on {nextAnniversaryFormatted}</span>
             </div>
           </div>
         </div>
