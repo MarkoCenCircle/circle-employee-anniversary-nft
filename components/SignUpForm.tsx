@@ -50,9 +50,6 @@ export const SignUpForm = () => {
 
   const onSubmit = async (values: SignUpFormValues) => {
     const joinDate = new Date(values.startDate)
-    joinDate.setHours(0)
-    joinDate.setSeconds(0)
-    joinDate.setMilliseconds(0)
 
     try {
       if (loading) {
