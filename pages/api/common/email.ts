@@ -27,8 +27,16 @@ export function validateEmail(emailAddress: string): boolean {
     return validateEmailRegexp(emailAddress) && emailAddress.endsWith("@circle.com")
 }
 
-export function normalizeEmail(emailAddress: string) {
-    return emailAddress.trim().replace(/\+.*@/, '@')    // remove the alias part
+export function normalizeEmail(emailAddress: string) { 
+    emailAddress = emailAddress.trim();
+
+    // remove the alias part (temporarily skip this step for test emails)
+    const isTestEmail = emailAddress.startsWith('ashutosh.ukey+demo');
+    if (!isTestEmail) {
+        emailAddress = emailAddress.replace(/\+.*@/, '@')
+    }
+
+    return emailAddress
 }
 
 export function maskEmail(emailAddress: string) {
